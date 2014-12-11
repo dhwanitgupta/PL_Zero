@@ -1,0 +1,27 @@
+CONST
+  m =  7,  
+  n = 85; 
+ 
+VAR
+  x, y, z, q, r;
+ 
+PROCEDURE m;
+VAR a, b;
+ 
+BEGIN
+  a := x;
+  b := y;
+  z := 0;
+  WHILE b > 0 DO BEGIN
+    IF ODD b THEN z := z + a;
+    a := 2 * a;
+    b := b / 2 
+  END;
+mul := a
+END;
+BEGIN
+x := 100;
+y := 10;
+CALL m
+END
+.
