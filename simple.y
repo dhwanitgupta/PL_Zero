@@ -4,7 +4,13 @@
 #include<string.h>
 #include "type.h"
 #include<ctype.h>
+
+int variable[26];
+procedure_block procedure_info[100];
+int procedure_index;
+
 tries* root_tries = NULL;
+
 tNode *build_operator(char *op,tNodeType t, tNode* left , tNode* right){
 
 	tNode *ptr;
