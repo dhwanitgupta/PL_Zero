@@ -1,9 +1,12 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-#include<string.h>
+#include <string.h>
+#include <ctype.h>
 #include "type.h"
-#include<ctype.h>
+
+extern int yyparse(void);
+extern int yylex();
 
 int variable[26];
 procedure_block procedure_info[100];
@@ -45,6 +48,18 @@ tNode* build_number(int num){
 	return ptr;
 }
 
+tries* get_block(){
+	
+	tries* temp;
+	temp = (tries *)malloc(sizeof(tries));
+	temp->data = 0;
+	temp->value = 0;
+	int i;
+	for(i=0;i<63;i++)
+		temp->next[i] =NULL;
+	return temp;
+}
+
 tNode* get_procedure(char* p_name){
 	
 	int i = 0;
@@ -54,6 +69,76 @@ tNode* get_procedure(char* p_name){
 		}
 	}
 }
+
+int get_index(char c){
+	
+	int ind = (int)c;
+	if(c >= '0' && c <= '9')
+		return (int)c - 48;
+
+	if(c >= 'a' && c <= 'z')
+		return (int)c - 87;
+
+	if(c >= 'A' && c <= 'Z')
+		return (int)c - 29;
+
+	if(c == '_')
+		return 62;
+}
+
+int check(char *str,int* val){
+	int i = 0;
+	tries* root = root_tries;
+	int index;
+	while(str[i] != '\0'){
+		index = get_index(str[i]);
+		if(root->next[index] == NULL)
+			return 0;
+		if(str[i+1] == '\0' && root->next[index]->data == 1){
+			*val = root->next[index]->value;
+			return 1;
+		}
+		root = root->next[index];
+		i++;
+	}
+	return 0;
+}
+
+int insert(char *str,int value){
+
+	tries* temp = root_tries;
+	int i =0;
+	int index;
+	while(str[i] != '\0'){
+		index = get_index(str[i]);
+		if(root_tries->next[index] == NULL){
+			root_tries->next[index] = get_block();
+			if(str[i+1] == '\0'){
+				root_tries->next[index]->data = 1;
+				root_tries->next[index]->value = value;
+			}
+			root_tries = root_tries->next[index];
+			root_tries->c = str[i];
+		}	
+		else{
+			root_tries = root_tries->next[index];
+			root_tries->c = str[i];
+
+			if(str[i+1] =='\0'){
+			//	if(root_tries->data == 1)
+			//		return 0;
+			//	else{
+					root_tries->data = 1;
+					root_tries->value = value;
+			//	}
+			}
+		}
+		i++;
+	}
+	root_tries = temp;
+	return 1;
+}
+
 int evaluate(tNode *root){
 	
 	if(root == NULL)
@@ -239,83 +324,7 @@ void printTree_pre(tNode* root){
 	}
 
 }
-int get_index(char c){
-	
-	int ind = (int)c;
-	if(c >= '0' && c <= '9')
-		return (int)c - 48;
 
-	if(c >= 'a' && c <= 'z')
-		return (int)c - 87;
-
-	if(c >= 'A' && c <= 'Z')
-		return (int)c - 29;
-
-	if(c == '_')
-		return 62;
-}
-tries* get_block(){
-	
-	tries* temp;
-	temp = (tries *)malloc(sizeof(tries));
-	temp->data = 0;
-	temp->value = 0;
-	int i;
-	for(i=0;i<63;i++)
-		temp->next[i] =NULL;
-	return temp;
-}
-int check(char *str,int* val){
-	int i = 0;
-	tries* root = root_tries;
-	int index;
-	while(str[i] != '\0'){
-		index = get_index(str[i]);
-		if(root->next[index] == NULL)
-			return 0;
-		if(str[i+1] == '\0' && root->next[index]->data == 1){
-			*val = root->next[index]->value;
-			return 1;
-		}
-		root = root->next[index];
-		i++;
-	}
-	return 0;
-}
-int insert(char *str,int value){
-
-	tries* temp = root_tries;
-	int i =0;
-	int index;
-	while(str[i] != '\0'){
-		index = get_index(str[i]);
-		if(root_tries->next[index] == NULL){
-			root_tries->next[index] = get_block();
-			if(str[i+1] == '\0'){
-				root_tries->next[index]->data = 1;
-				root_tries->next[index]->value = value;
-			}
-			root_tries = root_tries->next[index];
-			root_tries->c = str[i];
-		}	
-		else{
-			root_tries = root_tries->next[index];
-			root_tries->c = str[i];
-
-			if(str[i+1] =='\0'){
-			//	if(root_tries->data == 1)
-			//		return 0;
-			//	else{
-					root_tries->data = 1;
-					root_tries->value = value;
-			//	}
-			}
-		}
-		i++;
-	}
-	root_tries = temp;
-	return 1;
-}
 void printf_values(tries* root,char str[100],int index){
 /*	int i;
 
